@@ -12,64 +12,67 @@ class Resources(object):
     a list of qualifiers where this resource occurs
     '''
     
-    property_animations = {}
     tween_animations = {}
+    property_animations = {}
+    arrays = {}
+    attrs = {}
+    booleans = {}
     colors = {}
+    declare_styleables = {}
+    dimensions = {}
     drawables = {}
+    fractions = {}
+    ids = {}
+    integers = {}
+    interpolators = {}
     layouts = {}
     menus = {}
-    raw = {}
-    
-    arrays = {}
-    dimensions = {}
-    strings = {}
+    mipmaps = {}
     plurals = {}
+    raw = {}
+    strings = {}
     styles = {}
-    
+    styleables = {}
     xml = {}
+    
+    _ATTRS = { 'tween_animations': 'Tween animations',
+               'property_animations': 'Property animations',
+               'arrays': 'Arrays',
+               'attrs': 'Attributes',
+               'booleans':'Booleans',
+               'colors':'Colors',
+               'declare_styleables':'Declare styleables',
+               'dimensions':'Dimensions',
+               'drawables':'Drawables',
+               'fractions':'Fractions',
+               'ids':'IDs',
+               'integers':'Integers',
+               'interpolators':'Interpolators',
+               'layouts':'Layouts',
+               'menus':'Menus',
+               'mipmaps':'Mipmaps',
+               'plurals':'Plurals',
+               'raw':'Raw',
+               'strings':'Strings',
+               'styles':'Styles',
+               'styleables':'Styleables',
+               'xml':'XML',}
 
-    def __init__(self, property_animations={}, tween_animations={}, colors={},
-                       drawables={}, layouts={}, menus={}, raw={}, arrays={},
-                       dimensions={}, strings={}, plurals={}, styles={}, xml={}):
-        self.property_animations = property_animations
-        self.tween_animations = tween_animations
-        self.colors = colors
-        self.drawables = drawables
-        self.layouts = layouts
-        self.menus = menus
-        self.raw = raw
-        self.arrays = arrays
-        self.dimensions = dimensions
-        self.strings = strings
-        self.plurals = plurals
-        self.styles = styles
-        self.xml = xml
+    def __init__(self):
+        pass
     
     def dump(self):
-        print "Resources"
-        print "---------"
-        print "Colors: %s" % self.colors
-        print "Drawables: %s" % self.drawables
-        print "Layouts: %s" % self.layouts
+        for attrname in sorted( Resources._ATTRS.keys() ):
+            attr = getattr( self, attrname )
+            if len( attr ) > 0:
+                print "%s: %s" % ( Resources._ATTRS[attrname], attr )
         
     def dump_count(self):
-        print "Property animations: %d" % len( self.property_animations.keys() )
-        print "Tween animations: %d" % len( self.tween_animations.keys() )
-        print "Colors: %d" % len( self.colors.keys() )
-        print "Drawables: %d" % len( self.drawables.keys() )
-        print "Layouts: %d" % len( self.layouts.keys() )
-        print "Menus: %d" % len( self.menus.keys() )
-        print "Raw: %d" % len( self.raw.keys() )
-        print "Arrays: %d" % len( self.arrays.keys() )
-        print "Dimensions: %d" % len( self.dimensions.keys() )
-        print "Strings: %d" % len( self.strings.keys() )
-        print "Plurals: %d" % len( self.plurals.keys() )
-        print "Styles: %d" % len( self.styles.keys() )
-        print "XML: %d" % len( self.xml.keys() )
+        for attrname in sorted( Resources._ATTRS.keys() ):
+            attr = getattr( self, attrname )
+            if len( attr ) > 0:
+                print "%s: %d" % ( Resources._ATTRS[attrname], len( attr ) )
         
-    def __str__(self):
-        return "Resources: colors(%s)" % ( self.colors )
-
     def add(self, restype, name, value):
         if not hasattr( self, restype ):
             raise ValueError( "Invalid resource type: %s" % ( restype ) )
@@ -80,4 +83,5 @@ class Resources(object):
         if not res.has_key( name ):
             res[name] = []
             
-        res[name].append( value )
+        if value not in res[name]:
+            res[name].append( value )
