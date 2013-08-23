@@ -111,35 +111,23 @@ class ResourceAnalyzer(object):
         for attr_i in xrange( element.attributes.length ):
             attribute = element.attributes.item( attr_i )
             val = attribute.value
-            if element.tagName == 'style':
-                print "<%s %s='%s'>" % ( element.tagName, attribute.name, attribute.value )
-            if element.tagName == 'style' and attribute.name == 'parent' and not attribute.value.startswith( '@' ):
-                """
-                Special case. In a style element's parent attribute, the start '@style/' is optional 
-                """
-                pass
             if not val.startswith( '@' ) or not '/' in val or val.startswith( '@android:' ):
                 continue
             
-            if element.tagName == 'style' and attribute.name == 'parent' and not attribute.value.startswith( '@' ):
-                ref_type = ResourceAnalyzer.ITEM_TYPES.get( 'style' )
-                ref_name = attribute.value
+            ref_name = val[ val.index('/')+1: ].encode('ascii')
+            if attribute.value.startswith( '@+' ):
+                ref_type = val[ 2:val.index('/') ]
+                if not ref_type in ResourceAnalyzer.ITEM_TYPES.keys():
+                    print "*** Unknown element '%s' ***" % ( ref_type )
+                    continue
+                ref_type = ResourceAnalyzer.ITEM_TYPES.get( ref_type )
+                result.add( ref_type, ref_name, qualifiers )
             else:
-                ref_name = val[ val.index('/')+1: ].encode('ascii')
-                if attribute.value.startswith( '@+' ):
-                    ref_type = val[ 2:val.index('/') ]
-                    if not ref_type in ResourceAnalyzer.ITEM_TYPES.keys():
-                        print "*** Unknown element '%s' ***" % ( ref_type )
-                        continue
-                    ref_type = ResourceAnalyzer.ITEM_TYPES.get( ref_type )
-                    result.add( ref_type, ref_name, qualifiers )
-                else:
-                    ref_type = val[ 1:val.index('/') ]
-                    if not ref_type in ResourceAnalyzer.ITEM_TYPES.keys():
-                        print "*** Unknown element '%s' ***" % ( ref_type )
-                        continue
-                    ref_type = ResourceAnalyzer.ITEM_TYPES.get( ref_type )
-                
+                ref_type = val[ 1:val.index('/') ]
+                if not ref_type in ResourceAnalyzer.ITEM_TYPES.keys():
+                    print "*** Unknown element '%s' ***" % ( ref_type )
+                    continue
+                ref_type = ResourceAnalyzer.ITEM_TYPES.get( ref_type )
                 
             result.add_reference( restype, resname, ref_type, ref_name )
         for child in filter( lambda n: n.nodeType == Node.ELEMENT_NODE, element.childNodes ):
