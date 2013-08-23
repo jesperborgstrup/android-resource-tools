@@ -12,28 +12,9 @@ class Resources(object):
     a list of qualifiers where this resource occurs
     '''
     
-    tween_animations = {}
-    property_animations = {}
-    arrays = {}
-    attrs = {}
-    booleans = {}
-    colors = {}
-    declare_styleables = {}
-    dimensions = {}
-    drawables = {}
-    fractions = {}
-    ids = {}
-    integers = {}
-    interpolators = {}
-    layouts = {}
-    menus = {}
-    mipmaps = {}
-    plurals = {}
-    raw = {}
-    strings = {}
-    styles = {}
-    styleables = {}
-    xml = {}
+    resources = {}
+    references = {}
+    manifest_references = set()
     
     _ATTRS = { 'tween_animations': 'Tween animations',
                'property_animations': 'Property animations',
@@ -59,29 +40,41 @@ class Resources(object):
                'xml':'XML',}
 
     def __init__(self):
-        pass
+        for restype in Resources._ATTRS.keys():
+            self.resources[restype] = {}
     
     def dump(self):
-        for attrname in sorted( Resources._ATTRS.keys() ):
-            attr = getattr( self, attrname )
+        for attrname in sorted( self.resources.keys() ):
+            attr = self.resources[ attrname ]
             if len( attr ) > 0:
                 print "%s: %s" % ( Resources._ATTRS[attrname], attr )
         
     def dump_count(self):
-        for attrname in sorted( Resources._ATTRS.keys() ):
-            attr = getattr( self, attrname )
+        for attrname in sorted( self.resources.keys() ):
+            attr = self.resources[ attrname ]
             if len( attr ) > 0:
                 print "%s: %d" % ( Resources._ATTRS[attrname], len( attr ) )
         
     def add(self, restype, name, value):
-        if not hasattr( self, restype ):
+        if not Resources._ATTRS.has_key( restype ):
             raise ValueError( "Invalid resource type: %s" % ( restype ) )
-        res = getattr(self, restype)
-        if not isinstance( res, dict ):
-            raise ValueError( "Invalid resource type: %s" % ( restype ) )
+        res = self.resources[ restype ]
 
         if not res.has_key( name ):
             res[name] = []
             
         if value not in res[name]:
             res[name].append( value )
+            
+    def add_reference(self, from_restype, from_resname, to_restype, to_resname):
+        if not self.resources.has_key( from_restype ):
+            raise ValueError( "Invalid resource type: %s" % ( from_restype ) )
+        if not self.resources.has_key( to_restype ):
+            raise ValueError( "Invalid resource type: %s" % ( to_restype ) )
+        to_tuple = ( to_restype, to_resname )
+        
+        if not self.references.has_key( from_restype ):
+            self.references[ from_restype ] = {}
+        if not self.references[ from_restype ].has_key( from_resname ):
+            self.references[ from_restype ][ from_resname ] = set()
+        self.references[ from_restype ][ from_resname ].add( to_tuple )

@@ -38,10 +38,8 @@ class JavaAnalyzer(object):
         self.r_pattern = re.compile( r"R\.(%s).(\w+)" % ( "|".join( JavaAnalyzer.R_SUBCLASSES.keys() ) ) )
         self.debug = debug
         
-    def read(self):
+    def read_resource_references(self):
         self.debug_log( "Reading Java resource references from %s" % self.srcroot )
-        print self.r_pattern.pattern
-        print dir( self.r_pattern )
         reachable_resources = {}
         # Find dirs (http://stackoverflow.com/a/142535)
         for root, _, filenames in os.walk( self.srcroot ):
@@ -57,8 +55,11 @@ class JavaAnalyzer(object):
                 matches = self.r_pattern.findall( filecontent )
                 if len( matches ) > 0:
                     for match in matches:
-                        restype = match[0].encode('ascii')
-                        resname = match[1]
+                        if not JavaAnalyzer.R_SUBCLASSES.has_key( match[0] ):
+                            print "*** Unknown resource type %s ***" % ( match[0] )
+                            continue
+                        restype = JavaAnalyzer.R_SUBCLASSES[ match[0] ]
+                        resname = match[1].encode('ascii')
                         if not reachable_resources.has_key( restype ):
                             reachable_resources[restype] = set()
                         reachable_resources[restype].add( resname )
